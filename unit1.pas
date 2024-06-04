@@ -254,16 +254,18 @@ end;
 procedure TScreenSaverForm.UniqueInstance1OtherInstance(Sender: TObject;
   ParamCount: Integer; const Parameters: array of String);
 begin
+  if (ParamCount > 0) and (ParamStr(1) = '/s') then
+  begin
   Application.Terminate;
+  end;
+
 end;
 
 procedure TScreenSaverForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  if (ParamCount > 0) and (ParamStr(1) = '/s') then
-  begin
-    Application.Terminate;
-end;
 
+
+    Application.Terminate;
 end;
 
 procedure TScreenSaverForm.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
