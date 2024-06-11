@@ -14,7 +14,6 @@ object ScreenSaverForm: TScreenSaverForm
     Top = 86
   end
   object UniqueInstance1: TUniqueInstance
-    Enabled = True
     OnOtherInstance = UniqueInstance1OtherInstance
     Left = 311
     Top = 137

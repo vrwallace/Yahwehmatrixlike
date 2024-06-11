@@ -401,6 +401,7 @@ begin
   // Check for /s parameter to start the screensaver
   if (ParamCount > 0) and (ParamStr(1) = '/s') then
   begin
+    uniqueinstance1.Enabled:=true;
     // Hide the mouse cursor
     HideMouseCursor;
 
@@ -444,6 +445,7 @@ begin
   end
   else if (ParamCount > 1) and (ParamStr(1) = '/p') then
   begin
+    uniqueinstance1.Enabled:=false;
     // Preview mode using specified window handle
     ParentWnd := StrToInt(ParamStr(2));
     windows.SetParent(Handle, ParentWnd);
