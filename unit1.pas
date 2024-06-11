@@ -631,7 +631,7 @@ begin
   // Calculate the height of a single line of text
   InfoHeight := Canvas.TextHeight('W');
   // Calculate the total height needed for all text lines with spacing
-  TotalInfoHeight := 9 * (InfoHeight + InfoTextSpacing) + 20; // 8 lines of text + box title + margins
+  TotalInfoHeight := 10 * (InfoHeight + InfoTextSpacing) + 20; // 9 lines of text + 1 line for vonwallace.com + box title + margins
 
   // Calculate maximum X and Y positions to ensure the text stays within the screen
   MaxInfoX := ScreenWidths[FormIndex] - InfoWidth - 20; // 20 is an arbitrary margin
@@ -642,6 +642,7 @@ begin
   InfoY := Random(MaxInfoY);
   Invalidate;
 end;
+
 
 
 
@@ -680,7 +681,7 @@ begin
   // Calculate dimensions of the information box
   InfoHeight := Canvas.TextHeight('W'); // Approximate height of a line of text
   BoxWidth := Canvas.TextWidth(LongestText) + 150; // Add more padding for safety
-  BoxHeight := 9 * (InfoHeight + InfoTextSpacing) + 20; // 8 lines of text + 1 line for box title + margins
+  BoxHeight := 10 * (InfoHeight + InfoTextSpacing) + 20; // 9 lines of text + 1 line for vonwallace.com + 1 line for box title + margins
 
   // Draw the information box
   InfoRect := Rect(InfoX, InfoY, InfoX + BoxWidth, InfoY + BoxHeight);
@@ -700,7 +701,13 @@ begin
   Canvas.TextOut(InfoX + 10, InfoY + 10 + 6 * (InfoHeight + InfoTextSpacing), 'Available Physical Memory: ' + IntToStr(FAvailablePhysicalMemory) + ' MB');
   Canvas.TextOut(InfoX + 10, InfoY + 10 + 7 * (InfoHeight + InfoTextSpacing), 'Ping Time: ' + IntToStr(FPingTime) + ' ms');
   Canvas.TextOut(InfoX + 10, InfoY + 10 + 8 * (InfoHeight + InfoTextSpacing), 'System Uptime: ' + FormattedUptime);
+
+  // Set the font to bold for the vonwallace.com text
+  Canvas.Font.Style := [fsBold];
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 9 * (InfoHeight + InfoTextSpacing), 'vonwallace.com');
 end;
+
+
 
 
 
