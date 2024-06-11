@@ -1,7 +1,7 @@
 object ScreenSaverForm: TScreenSaverForm
-  Left = 2169
+  Left = 2118
   Height = 472
-  Top = 256
+  Top = 398
   Width = 480
   Caption = 'ScreenSaverForm'
   DesignTimePPI = 144
@@ -16,7 +16,13 @@ object ScreenSaverForm: TScreenSaverForm
   object UniqueInstance1: TUniqueInstance
     Enabled = True
     OnOtherInstance = UniqueInstance1OtherInstance
-    Left = 310
+    Left = 311
     Top = 137
+  end
+  object Timer2: TTimer
+    Enabled = False
+    OnTimer = Timer2Timer
+    Left = 155
+    Top = 291
   end
 end
