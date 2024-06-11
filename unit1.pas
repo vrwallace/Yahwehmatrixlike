@@ -112,6 +112,7 @@ type
     ReplySize: DWORD; Timeout: DWORD): DWORD; stdcall; external 'icmp.dll' name 'IcmpSendEcho';
 
 procedure CreateFormsForAllMonitors;
+function FormatUptime(Uptime: Int64): string;
 
 var
   FormsList: array of TScreenSaverForm;
@@ -260,7 +261,7 @@ begin
   PingTime := GetPingTime('8.8.8.8');
 
   // Get system uptime
-  SystemUptime := GetTickCount64 div (1000 * 60); // Convert to minutes
+  SystemUptime := GetTickCount64 div 1000; // Convert to seconds
 
   // Store the values in class variables for later display
   FTotalPhysicalMemory := TotalPhysicalMemory;
@@ -269,6 +270,7 @@ begin
   FPingTime := PingTime;
   FSystemUptime := SystemUptime;
 end;
+
 
 function TScreenSaverForm.GetCPUUsage: Integer;
 var
@@ -611,15 +613,23 @@ var
   MaxInfoX, MaxInfoY: Integer;
   InfoWidth, InfoHeight: Integer;
   TotalInfoHeight: Integer;
+  LongestText: string;
+  FormattedUptime: string;
 begin
   Canvas.Font.Size := 24; // Ensure the font size matches the size used in FormPaint
 
+  // Determine the longest text for calculating box width
+  FormattedUptime := FormatUptime(FSystemUptime);
+  LongestText := 'Total Physical Memory: 99999 MB';
+  if Canvas.TextWidth('System Uptime: ' + FormattedUptime) > Canvas.TextWidth(LongestText) then
+    LongestText := 'System Uptime: ' + FormattedUptime;
+
   // Calculate the approximate width of the longest text line
-  InfoWidth := Canvas.TextWidth('Total Physical Memory: 99999 MB');
+  InfoWidth := Canvas.TextWidth(LongestText) + 100; // Add more padding for safety
   // Calculate the height of a single line of text
   InfoHeight := Canvas.TextHeight('W');
   // Calculate the total height needed for all text lines with spacing
-  TotalInfoHeight := 8 * (InfoHeight + InfoTextSpacing);
+  TotalInfoHeight := 9 * (InfoHeight + InfoTextSpacing) + 20; // 8 lines of text + box title + margins
 
   // Calculate maximum X and Y positions to ensure the text stays within the screen
   MaxInfoX := ScreenWidths[FormIndex] - InfoWidth - 20; // 20 is an arbitrary margin
@@ -631,10 +641,16 @@ begin
   Invalidate;
 end;
 
+
+
+
 procedure TScreenSaverForm.FormPaint(Sender: TObject);
 var
   i, j: Integer;
-  InfoHeight: Integer;
+  InfoHeight, BoxWidth, BoxHeight: Integer;
+  InfoRect: TRect;
+  FormattedUptime: string;
+  LongestText: string;
 begin
   // Set the background mode to transparent
   SetBkMode(Canvas.Handle, TRANSPARENT);
@@ -653,18 +669,39 @@ begin
 
   Canvas.Font.Size := 24; // Adjust font size as needed
 
-  // Draw system information at the calculated position
-  InfoHeight := Canvas.TextHeight('W'); // Approximate height of a line of text
+  // Determine the longest text for calculating box width
+  FormattedUptime := FormatUptime(FSystemUptime);
+  LongestText := 'Total Physical Memory: 99999 MB';
+  if Canvas.TextWidth('System Uptime: ' + FormattedUptime) > Canvas.TextWidth(LongestText) then
+    LongestText := 'System Uptime: ' + FormattedUptime;
 
-  Canvas.TextOut(InfoX, InfoY, 'CPU Utilization: ' + IntToStr(CpuUtilization) + '%');
-  Canvas.TextOut(InfoX, InfoY + InfoHeight + InfoTextSpacing, 'Memory Utilization: ' + IntToStr(MemoryUtilization) + '%');
-  Canvas.TextOut(InfoX, InfoY + 2 * (InfoHeight + InfoTextSpacing), 'Disk Space Free: ' + IntToStr(DiskSpace) + ' GB');
-  Canvas.TextOut(InfoX, InfoY + 3 * (InfoHeight + InfoTextSpacing), 'Disk Space Used: ' + IntToStr(FUsedDiskSpace) + ' GB');
-  Canvas.TextOut(InfoX, InfoY + 4 * (InfoHeight + InfoTextSpacing), 'Total Physical Memory: ' + IntToStr(FTotalPhysicalMemory) + ' MB');
-  Canvas.TextOut(InfoX, InfoY + 5 * (InfoHeight + InfoTextSpacing), 'Available Physical Memory: ' + IntToStr(FAvailablePhysicalMemory) + ' MB');
-  Canvas.TextOut(InfoX, InfoY + 6 * (InfoHeight + InfoTextSpacing), 'Ping Time: ' + IntToStr(FPingTime) + ' ms');
-  Canvas.TextOut(InfoX, InfoY + 7 * (InfoHeight + InfoTextSpacing), 'System Uptime: ' + IntToStr(FSystemUptime) + ' minutes');
+  // Calculate dimensions of the information box
+  InfoHeight := Canvas.TextHeight('W'); // Approximate height of a line of text
+  BoxWidth := Canvas.TextWidth(LongestText) + 100; // Add more padding for safety
+  BoxHeight := 9 * (InfoHeight + InfoTextSpacing) + 20; // 8 lines of text + 1 line for box title + margins
+
+  // Draw the information box
+  InfoRect := Rect(InfoX, InfoY, InfoX + BoxWidth, InfoY + BoxHeight);
+  Canvas.Brush.Style := bsClear;
+  Canvas.Pen.Color := TextColor;
+  Canvas.Rectangle(InfoRect);
+
+  // Draw the system information text inside the box
+  Canvas.Font.Color := TextColor; // Set text color to white for visibility
+
+  Canvas.TextOut(InfoX + 10, InfoY + 10, 'System Information');
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + InfoHeight + InfoTextSpacing, 'CPU Utilization: ' + IntToStr(CpuUtilization) + '%');
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 2 * (InfoHeight + InfoTextSpacing), 'Memory Utilization: ' + IntToStr(MemoryUtilization) + '%');
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 3 * (InfoHeight + InfoTextSpacing), 'Disk Space Free: ' + IntToStr(DiskSpace) + ' GB');
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 4 * (InfoHeight + InfoTextSpacing), 'Disk Space Used: ' + IntToStr(FUsedDiskSpace) + ' GB');
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 5 * (InfoHeight + InfoTextSpacing), 'Total Physical Memory: ' + IntToStr(FTotalPhysicalMemory) + ' MB');
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 6 * (InfoHeight + InfoTextSpacing), 'Available Physical Memory: ' + IntToStr(FAvailablePhysicalMemory) + ' MB');
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 7 * (InfoHeight + InfoTextSpacing), 'Ping Time: ' + IntToStr(FPingTime) + ' ms');
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 8 * (InfoHeight + InfoTextSpacing), 'System Uptime: ' + FormattedUptime);
 end;
+
+
+
 
 procedure TScreenSaverForm.WndProc(var Msg: TMessage);
 begin
@@ -675,6 +712,20 @@ begin
     SetForegroundWindow(Handle);
   end;
 end;
+function FormatUptime(Uptime: Int64): string;
+var
+  Days, Hours, Minutes, Seconds: Int64;
+begin
+  Seconds := Uptime mod 60;
+  Uptime := Uptime div 60;
+  Minutes := Uptime mod 60;
+  Uptime := Uptime div 60;
+  Hours := Uptime mod 24;
+  Days := Uptime div 24;
+
+  Result := Format('%dd %dh %dm %ds', [Days, Hours, Minutes, Seconds]);
+end;
+
 
 end.
 
