@@ -478,7 +478,9 @@ begin
   end
   else if (ParamCount > 0) and (ParamStr(1) = '/c') then
   begin
+    uniqueinstance1.Enabled:=false;
     // Terminate the application for configuration parameter
+  // Showmessage('This screen saver does not have any configurable settings.');
     Application.Terminate;
   end
   else
