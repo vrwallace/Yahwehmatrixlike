@@ -625,7 +625,7 @@ begin
     LongestText := 'System Uptime: ' + FormattedUptime;
 
   // Calculate the approximate width of the longest text line
-  InfoWidth := Canvas.TextWidth(LongestText) + 100; // Add more padding for safety
+  InfoWidth := Canvas.TextWidth(LongestText) + 150; // Add more padding for safety
   // Calculate the height of a single line of text
   InfoHeight := Canvas.TextHeight('W');
   // Calculate the total height needed for all text lines with spacing
@@ -677,7 +677,7 @@ begin
 
   // Calculate dimensions of the information box
   InfoHeight := Canvas.TextHeight('W'); // Approximate height of a line of text
-  BoxWidth := Canvas.TextWidth(LongestText) + 100; // Add more padding for safety
+  BoxWidth := Canvas.TextWidth(LongestText) + 150; // Add more padding for safety
   BoxHeight := 9 * (InfoHeight + InfoTextSpacing) + 20; // 8 lines of text + 1 line for box title + margins
 
   // Draw the information box
