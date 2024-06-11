@@ -8,7 +8,6 @@ object ScreenSaverForm: TScreenSaverForm
   OnCreate = FormCreate
   OnPaint = FormPaint
   LCLVersion = '3.2.0.0'
-  Visible = True
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
@@ -17,7 +16,7 @@ object ScreenSaverForm: TScreenSaverForm
   end
   object UniqueInstance1: TUniqueInstance
     OnOtherInstance = UniqueInstance1OtherInstance
-    Left = 311
+    Left = 312
     Top = 137
   end
   object Timer2: TTimer

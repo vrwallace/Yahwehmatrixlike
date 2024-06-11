@@ -163,6 +163,7 @@ begin
 
   for I := 0 to Screen.MonitorCount - 1 do
   begin
+
     MonitorInfo.cbSize := SizeOf(TMonitorInfo);
     GetMonitorInfo(Screen.Monitors[I].Handle, @MonitorInfo);
 
