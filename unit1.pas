@@ -276,7 +276,7 @@ begin
 end;
 
 
-{function TScreenSaverForm.GetCPUUsage: Integer;
+function TScreenSaverForm.GetCPUUsage: Integer;
 var
   IdleTime, KernelTime, UserTime: Int64;
   SystemTime, Usage: Integer;
@@ -302,9 +302,9 @@ begin
     PrevKernelTime := KernelTime;
     PrevUserTime := UserTime;
   end;
-end;   }
+end;
 
-    function TScreenSaverForm.GetCPUUsage: Integer;
+   { function TScreenSaverForm.GetCPUUsage: Integer;
 var
   WMIResult: TFPObjectList;
   PropNamesCPU: array[0..0] of string = ('PercentProcessorTime');
@@ -335,7 +335,7 @@ begin
       Result := 0;
     end;
   end;
-end;
+end;}
 
 
 
