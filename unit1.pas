@@ -276,7 +276,7 @@ begin
 end;
 
 
-function TScreenSaverForm.GetCPUUsage: Integer;
+{function TScreenSaverForm.GetCPUUsage: Integer;
 var
   IdleTime, KernelTime, UserTime: Int64;
   SystemTime, Usage: Integer;
@@ -302,7 +302,64 @@ begin
     PrevKernelTime := KernelTime;
     PrevUserTime := UserTime;
   end;
+end;}
+
+function TScreenSaverForm.GetCPUUsage: Integer;
+var
+  IdleTime, KernelTime, UserTime: Int64;
+  SystemTime, Usage: Int64;
+begin
+  Result := 0;  // Default result
+
+  // Ensure PrevIdleTime, PrevKernelTime, and PrevUserTime are initialized
+  if (PrevIdleTime = 0) and (PrevKernelTime = 0) and (PrevUserTime = 0) then
+  begin
+    if RetrieveSystemTimes(IdleTime, KernelTime, UserTime) then
+    begin
+      PrevIdleTime := IdleTime;
+      PrevKernelTime := KernelTime;
+      PrevUserTime := UserTime;
+    end;
+    Exit;  // Exit the function on first call
+  end;
+
+  // Check if RetrieveSystemTimes is successful
+  if RetrieveSystemTimes(IdleTime, KernelTime, UserTime) then
+  begin
+    // Calculate the total system time since the last call
+    SystemTime := (KernelTime + UserTime) - (PrevKernelTime + PrevUserTime);
+
+    // Diagnostic output
+    OutputDebugString(PChar(Format('IdleTime: %d, KernelTime: %d, UserTime: %d', [IdleTime, KernelTime, UserTime])));
+    OutputDebugString(PChar(Format('PrevIdleTime: %d, PrevKernelTime: %d, PrevUserTime: %d', [PrevIdleTime, PrevKernelTime, PrevUserTime])));
+    OutputDebugString(PChar(Format('SystemTime: %d', [SystemTime])));
+
+    // Avoid division by zero
+    if SystemTime > 0 then
+    begin
+      // Calculate CPU usage
+      Usage := 100 - ((IdleTime - PrevIdleTime) * 100 div SystemTime);
+
+      // Diagnostic output
+      OutputDebugString(PChar(Format('Calculated Usage: %d', [Usage])));
+
+      // Validate the result
+      if (Usage >= 0) and (Usage <= 100) then
+      begin
+        Result := Usage;
+      end;
+    end;
+
+    // Update previous times for next calculation
+    PrevIdleTime := IdleTime;
+    PrevKernelTime := KernelTime;
+    PrevUserTime := UserTime;
+  end;
 end;
+
+
+
+
 
    { function TScreenSaverForm.GetCPUUsage: Integer;
 var
@@ -410,6 +467,7 @@ begin
     end;
   end;
 end;
+
 
 procedure TScreenSaverForm.FormCreate(Sender: TObject);
 var
