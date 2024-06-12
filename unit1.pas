@@ -484,7 +484,7 @@ begin
   // Initialize Winsock
   if WSAStartup(MAKEWORD(2, 2), WSAData) <> 0 then
   begin
-    ShowMessage('WSAStartup failed');
+    //ShowMessage('WSAStartup failed');
     Application.Terminate;
     Exit;
   end;
@@ -494,7 +494,7 @@ begin
   if not RetrieveSystemTimes(PrevIdleTime, PrevKernelTime, PrevUserTime) then
   begin
     // Handle the error if the initial times cannot be retrieved
-    ShowMessage('Error retrieving initial system times');
+    //ShowMessage('Error retrieving initial system times');
     Application.Terminate;
     Exit;
   end;
