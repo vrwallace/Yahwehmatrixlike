@@ -7,6 +7,7 @@ uses
 {$R *.res}
 
 begin
+  Application.Title:='jscreen';
   Application.Scaled:=True;
   Application.Initialize;
   Application.MainFormOnTaskbar := False;

@@ -116,6 +116,7 @@ type
 
 procedure CreateFormsForAllMonitors;
 function FormatUptime(Uptime: Int64): string;
+function GetCurrentDateTimeFormatted: string;
 
 var
   FormsList: array of TScreenSaverForm;
@@ -718,15 +719,18 @@ var
   InfoWidth, InfoHeight: Integer;
   TotalInfoHeight: Integer;
   LongestText: string;
-  FormattedUptime: string;
+  FormattedUptime, CurrentDateTime: string;
 begin
   Canvas.Font.Size := 24; // Ensure the font size matches the size used in FormPaint
 
   // Determine the longest text for calculating box width
   FormattedUptime := FormatUptime(FSystemUptime);
+  CurrentDateTime := GetCurrentDateTimeFormatted;
   LongestText := 'Total Physical Memory: 99999 MB';
   if Canvas.TextWidth('System Uptime: ' + FormattedUptime) > Canvas.TextWidth(LongestText) then
     LongestText := 'System Uptime: ' + FormattedUptime;
+  if Canvas.TextWidth('Current Date and Time: ' + CurrentDateTime) > Canvas.TextWidth(LongestText) then
+    LongestText := 'Current Date and Time: ' + CurrentDateTime;
 
   // Calculate the approximate width of the longest text line
   InfoWidth := Canvas.TextWidth(LongestText) + 150; // Add more padding for safety
@@ -740,10 +744,12 @@ begin
   MaxInfoY := ScreenHeights[FormIndex] - TotalInfoHeight - 20; // 20 is an arbitrary margin
 
   // Ensure there's some margin
-  InfoX := Random(MaxInfoX);
-  InfoY := Random(MaxInfoY);
+  InfoX := Random(MaxInfoX + 1);
+  InfoY := Random(MaxInfoY + 1);
   Invalidate;
 end;
+
+
 
 
 
@@ -754,7 +760,7 @@ var
   i, j: Integer;
   InfoHeight, BoxWidth, BoxHeight: Integer;
   InfoRect: TRect;
-  FormattedUptime: string;
+  FormattedUptime, CurrentDateTime: string;
   LongestText: string;
 begin
   // Set the background mode to transparent
@@ -776,14 +782,23 @@ begin
 
   // Determine the longest text for calculating box width
   FormattedUptime := FormatUptime(FSystemUptime);
+  CurrentDateTime := GetCurrentDateTimeFormatted;
   LongestText := 'Total Physical Memory: 99999 MB';
   if Canvas.TextWidth('System Uptime: ' + FormattedUptime) > Canvas.TextWidth(LongestText) then
     LongestText := 'System Uptime: ' + FormattedUptime;
+  if Canvas.TextWidth('Current Date and Time: ' + CurrentDateTime) > Canvas.TextWidth(LongestText) then
+    LongestText := 'Current Date and Time: ' + CurrentDateTime;
 
   // Calculate dimensions of the information box
   InfoHeight := Canvas.TextHeight('W'); // Approximate height of a line of text
   BoxWidth := Canvas.TextWidth(LongestText) + 150; // Add more padding for safety
-  BoxHeight := 10 * (InfoHeight + InfoTextSpacing) + 20; // 9 lines of text + 1 line for vonwallace.com + 1 line for box title + margins
+  BoxHeight := 11 * (InfoHeight + InfoTextSpacing) + 20; // 9 lines of text + 1 line for vonwallace.com + 1 line for box title + 1 line for current date and time + margins
+
+  // Calculate the maximum positions to ensure the box stays within screen bounds
+  if InfoX + BoxWidth > ScreenWidths[FormIndex] then
+    InfoX := ScreenWidths[FormIndex] - BoxWidth - 20;
+  if InfoY + BoxHeight > ScreenHeights[FormIndex] then
+    InfoY := ScreenHeights[FormIndex] - BoxHeight - 20;
 
   // Draw the information box
   InfoRect := Rect(InfoX, InfoY, InfoX + BoxWidth, InfoY + BoxHeight);
@@ -794,7 +809,12 @@ begin
   // Draw the system information text inside the box
   Canvas.Font.Color := TextColor; // Set text color to white for visibility
 
+  // Set the font to bold for the title
+  Canvas.Font.Style := [fsBold];
   Canvas.TextOut(InfoX + 10, InfoY + 10, 'System Information');
+
+  // Set the font to normal for the rest of the information
+  Canvas.Font.Style := [];
   Canvas.TextOut(InfoX + 10, InfoY + 10 + InfoHeight + InfoTextSpacing, 'CPU Utilization: ' + IntToStr(CpuUtilization) + '%');
   Canvas.TextOut(InfoX + 10, InfoY + 10 + 2 * (InfoHeight + InfoTextSpacing), 'Memory Utilization: ' + IntToStr(MemoryUtilization) + '%');
   Canvas.TextOut(InfoX + 10, InfoY + 10 + 3 * (InfoHeight + InfoTextSpacing), 'Disk Space Free: ' + IntToStr(DiskSpace) + ' GB');
@@ -803,11 +823,16 @@ begin
   Canvas.TextOut(InfoX + 10, InfoY + 10 + 6 * (InfoHeight + InfoTextSpacing), 'Available Physical Memory: ' + IntToStr(FAvailablePhysicalMemory) + ' MB');
   Canvas.TextOut(InfoX + 10, InfoY + 10 + 7 * (InfoHeight + InfoTextSpacing), 'Ping Time: ' + IntToStr(FPingTime) + ' ms');
   Canvas.TextOut(InfoX + 10, InfoY + 10 + 8 * (InfoHeight + InfoTextSpacing), 'System Uptime: ' + FormattedUptime);
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 9 * (InfoHeight + InfoTextSpacing), 'Current Date and Time: ' + CurrentDateTime);
 
   // Set the font to bold for the vonwallace.com text
   Canvas.Font.Style := [fsBold];
-  Canvas.TextOut(InfoX + 10, InfoY + 10 + 9 * (InfoHeight + InfoTextSpacing), 'vonwallace.com');
+  Canvas.TextOut(InfoX + 10, InfoY + 10 + 10 * (InfoHeight + InfoTextSpacing), 'vonwallace.com');
 end;
+
+
+
+
 
 
 
@@ -836,7 +861,10 @@ begin
 
   Result := Format('%dd %dh %dm %ds', [Days, Hours, Minutes, Seconds]);
 end;
-
+  function GetCurrentDateTimeFormatted: string;
+begin
+  Result := FormatDateTime('yyyy-mm-dd hh:nn:ss', Now);
+end;
 
 end.
 
