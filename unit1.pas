@@ -4,7 +4,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, UniqueInstance, MultiMon, Winsock;
+  Dialogs, ExtCtrls, UniqueInstance, MultiMon, Winsock,utilwmi,contnrs;
+
+
 
 const
   WH_MOUSE_LL = 14;
@@ -110,6 +112,7 @@ type
   function IcmpSendEcho(IcmpHandle: THandle; DestinationAddress: DWORD; RequestData: Pointer;
     RequestSize: WORD; RequestOptions: Pointer; ReplyBuffer: Pointer;
     ReplySize: DWORD; Timeout: DWORD): DWORD; stdcall; external 'icmp.dll' name 'IcmpSendEcho';
+
 
 procedure CreateFormsForAllMonitors;
 function FormatUptime(Uptime: Int64): string;
@@ -273,7 +276,7 @@ begin
 end;
 
 
-function TScreenSaverForm.GetCPUUsage: Integer;
+{function TScreenSaverForm.GetCPUUsage: Integer;
 var
   IdleTime, KernelTime, UserTime: Int64;
   SystemTime, Usage: Integer;
@@ -299,7 +302,45 @@ begin
     PrevKernelTime := KernelTime;
     PrevUserTime := UserTime;
   end;
+end;   }
+
+    function TScreenSaverForm.GetCPUUsage: Integer;
+var
+  WMIResult: TFPObjectList;
+  PropNamesCPU: array[0..0] of string = ('PercentProcessorTime');
+  UsageStr: string;
+  Usage: Integer;
+begin
+  Result := 0;  // Default result
+
+  try
+    // Retrieve CPU usage using WMI
+    WMIResult := GetWMIInfo('Win32_PerfFormattedData_PerfOS_Processor', PropNamesCPU, 'WHERE Name="_Total"');
+    if WMIResult.Count > 0 then
+    begin
+      UsageStr := TStringList(WMIResult[0]).Values['PercentProcessorTime'];
+      if TryStrToInt(UsageStr, Usage) then
+      begin
+        Result := Usage;
+      end;
+    end;
+
+    // Clean up
+    WMIResult.Free;
+
+  except
+    on E: Exception do
+    begin
+      // Handle any exceptions
+      Result := 0;
+    end;
+  end;
 end;
+
+
+
+
+
 
 function TScreenSaverForm.GetPingTime(const IPAddress: string): Integer;
 var
