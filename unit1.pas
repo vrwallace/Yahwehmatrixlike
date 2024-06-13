@@ -15,6 +15,7 @@ const
   IP_BUF_TOO_SMALL = 11001;
   IP_REQ_TIMED_OUT = 11010;
   TH32CS_SNAPPROCESS = $00000002;
+  WM_DISPLAYCHANGE = $007E;
 
 type
   TTextPosition = record
@@ -158,8 +159,6 @@ var
   I: Integer;
   MonitorInfo: TMonitorInfo;
   Form: TScreenSaverForm;
-  dm: TDeviceMode;
-  dd: TDisplayDevice;
 begin
   SetLength(FormsList, Screen.MonitorCount);
   SetLength(ScreenWidths, Screen.MonitorCount);
@@ -167,34 +166,23 @@ begin
 
   for I := 0 to Screen.MonitorCount - 1 do
   begin
-
     MonitorInfo.cbSize := SizeOf(TMonitorInfo);
     GetMonitorInfo(Screen.Monitors[I].Handle, @MonitorInfo);
 
-    ZeroMemory(@dd, SizeOf(dd));
-    dd.cb := SizeOf(dd);
-    EnumDisplayDevices(nil, I, @dd, 0);
+    ScreenWidths[I] := MonitorInfo.rcMonitor.Right - MonitorInfo.rcMonitor.Left;
+    ScreenHeights[I] := MonitorInfo.rcMonitor.Bottom - MonitorInfo.rcMonitor.Top;
 
-    // Get display settings for the monitor
-    ZeroMemory(@dm, SizeOf(dm));
-    dm.dmSize := SizeOf(dm);
-    if EnumDisplaySettings(dd.DeviceName, ENUM_CURRENT_SETTINGS, @dm) then
-    begin
-      ScreenWidths[I] := dm.dmPelsWidth;
-      ScreenHeights[I] := dm.dmPelsHeight;
+    // Debugging output to verify dimensions
+    OutputDebugString(PChar(Format('Monitor %d: Width=%d, Height=%d', [I, ScreenWidths[I], ScreenHeights[I]])));
 
-      // Debugging output to verify dimensions
-      OutputDebugString(PChar(Format('Monitor %d: Width=%d, Height=%d', [I, ScreenWidths[I], ScreenHeights[I]])));
+    Form := TScreenSaverForm.Create(Application, I);
+    Form.Left := MonitorInfo.rcMonitor.Left;
+    Form.Top := MonitorInfo.rcMonitor.Top;
+    Form.Width := ScreenWidths[I];
+    Form.Height := ScreenHeights[I];
 
-      Form := TScreenSaverForm.Create(Application, I);
-      Form.Left := MonitorInfo.rcMonitor.Left;
-      Form.Top := MonitorInfo.rcMonitor.Top;
-      Form.Width := ScreenWidths[I];
-      Form.Height := ScreenHeights[I];
-
-      FormsList[I] := Form;
-      Form.Show;
-    end;
+    FormsList[I] := Form;
+    Form.Show;
   end;
 end;
 
@@ -498,7 +486,7 @@ begin
     Application.Terminate;
     Exit;
   end;
-
+    Color := clBlack;
   // Check for /s parameter to start the screensaver
   if (ParamCount > 0) and (ParamStr(1) = '/s') then
   begin
@@ -846,6 +834,10 @@ begin
   begin
     SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE);
     SetForegroundWindow(Handle);
+  end
+  else if Msg.Msg = WM_DISPLAYCHANGE then
+  begin
+    Application.Terminate;
   end;
 end;
 function FormatUptime(Uptime: Int64): string;
