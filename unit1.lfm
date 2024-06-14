@@ -1,28 +1,27 @@
 object ScreenSaverForm: TScreenSaverForm
   Left = 2118
-  Height = 472
+  Height = 315
   Top = 398
-  Width = 480
+  Width = 320
   Caption = 'ScreenSaverForm'
-  DesignTimePPI = 144
   OnCreate = FormCreate
   OnPaint = FormPaint
   LCLVersion = '3.2.0.0'
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
-    Left = 123
-    Top = 86
+    Left = 82
+    Top = 57
   end
   object UniqueInstance1: TUniqueInstance
     OnOtherInstance = UniqueInstance1OtherInstance
-    Left = 312
-    Top = 137
+    Left = 208
+    Top = 91
   end
   object Timer2: TTimer
     Enabled = False
     OnTimer = Timer2Timer
-    Left = 155
-    Top = 291
+    Left = 103
+    Top = 194
   end
 end

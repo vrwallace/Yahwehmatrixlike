@@ -22,8 +22,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="881"/>
-        <CursorPos X="3" Y="904"/>
+        <TopLine Value="867"/>
+        <CursorPos X="5" Y="901"/>
         <UsageCount Value="43"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -60,18 +60,6 @@
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="618" Column="34" TopLine="586"/>
-      </Position>
-      <Position>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="74" Column="6" TopLine="55"/>
-      </Position>
-      <Position>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="496" Column="54" TopLine="478"/>
-      </Position>
       <Position>
         <Filename Value="unit1.pas"/>
         <Caret Line="589" Column="52" TopLine="558"/>
@@ -150,10 +138,6 @@
       </Position>
       <Position>
         <Filename Value="unit1.pas"/>
-        <Caret Line="21" Column="7" TopLine="66"/>
-      </Position>
-      <Position>
-        <Filename Value="unit1.pas"/>
         <Caret Line="77" Column="36" TopLine="66"/>
       </Position>
       <Position>
@@ -180,6 +164,22 @@
         <Filename Value="unit1.pas"/>
         <Caret Line="121" Column="22" TopLine="103"/>
       </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="904" Column="3" TopLine="866"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="893" Column="30" TopLine="875"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="79" Column="24" TopLine="51"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="778" Column="85" TopLine="745"/>
+      </Position>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
@@ -187,7 +187,6 @@
         <Mode Name="default">
           <local>
             <CommandLineParams Value="/s"/>
-            <LaunchingApplication PathPlusParams="C:\windows\system32\cmd.exe /C ${TargetCmdLine}"/>
           </local>
         </Mode>
       </Modes>
