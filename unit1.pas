@@ -6,7 +6,19 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls, UniqueInstance, MultiMon, Winsock,utilwmi,contnrs;
 
+  const
+  DISPLAY_DEVICE_ACTIVE = $00000001;
+  DISPLAY_DEVICE_MIRRORING_DRIVER = $00000008;
 
+type
+  TDisplayDevice = record
+    cb: DWORD;
+    DeviceName: array[0..31] of Char;
+    DeviceString: array[0..127] of Char;
+    StateFlags: DWORD;
+    DeviceID: array[0..127] of Char;
+    DeviceKey: array[0..127] of Char;
+  end;
 
 const
   WH_MOUSE_LL = 14;
@@ -58,10 +70,12 @@ type
     Timer1: TTimer;
     TerminationTimer: TTimer;
     Timer2: TTimer;
+    MonitorCountTimer: TTimer;
     UniqueInstance1: TUniqueInstance;
     procedure FormCreate(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure TerminationTimerTimer(Sender: TObject);
+    procedure MonitorCountTimerTimer(Sender: TObject);
     procedure FormPaint(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -70,6 +84,7 @@ type
     procedure Timer2Timer(Sender: TObject);
     procedure UniqueInstance1OtherInstance(Sender: TObject;
       ParamCount: Integer; const Parameters: array of String);
+
 
   private
     HebrewText: WideString;
@@ -89,6 +104,7 @@ type
     FUsedDiskSpace: Int64;
     FPingTime: Integer;
     FSystemUptime: Int64;
+    InitialMonitorCount: Integer;
     function GetCPUUsage: Integer;
     function GetPingTime(const IPAddress: string): Integer; // Ensure the parameter name matches
     procedure GetSystemInfo;
@@ -486,6 +502,12 @@ begin
     Application.Terminate;
     Exit;
   end;
+
+  InitialMonitorCount := Screen.MonitorCount;
+  MonitorCountTimer := TTimer.Create(Self);
+  MonitorCountTimer.Interval := 1000; // Check every 1 second
+  MonitorCountTimer.OnTimer := @MonitorCountTimerTimer;
+  MonitorCountTimer.Enabled := True;
     Color := clBlack;
   // Check for /s parameter to start the screensaver
   if (ParamCount > 0) and (ParamStr(1) = '/s') then
@@ -577,7 +599,51 @@ begin
     Application.Terminate;
   end;
 end;
+ procedure TScreenSaverForm.MonitorCountTimerTimer(Sender: TObject);
+var
+  I: Integer;
+  MonitorCountText: string;
+  DisplayDevice: TDisplayDevice;
+  ActiveMonitorCount: Integer;
+begin
+  // Count the number of active monitors
+  ActiveMonitorCount := 0;
+  ZeroMemory(@DisplayDevice, SizeOf(DisplayDevice));
+  DisplayDevice.cb := SizeOf(DisplayDevice);
+  I := 0;
+  while EnumDisplayDevices(nil, I, @DisplayDevice, 0) do
+  begin
+    if (DisplayDevice.StateFlags and DISPLAY_DEVICE_ACTIVE <> 0) and
+       (DisplayDevice.StateFlags and DISPLAY_DEVICE_MIRRORING_DRIVER = 0) then
+    begin
+      Inc(ActiveMonitorCount);
+    end;
+    Inc(I);
+  end;
 
+  OutputDebugString(PChar('Active Monitor Count: ' + IntToStr(ActiveMonitorCount)));
+  OutputDebugString(PChar('Initial Monitor Count: ' + IntToStr(InitialMonitorCount)));
+
+  if ActiveMonitorCount <> InitialMonitorCount then
+  begin
+    OutputDebugString('Active monitor count changed. Terminating screen saver.');
+    Application.Terminate;
+  end;
+
+  // Create the monitor count text
+  {MonitorCountText := 'Initial Monitors: ' + IntToStr(InitialMonitorCount) + '  Active Monitors: ' + IntToStr(ActiveMonitorCount);
+
+  // Draw the monitor count text on each screen saver form
+  for I := 0 to Length(FormsList) - 1 do
+  begin
+    with FormsList[I] do
+    begin
+      Canvas.Font.Color := clLime;
+      Canvas.Font.Size := 20;
+      Canvas.TextOut(50, 50, MonitorCountText);
+    end;
+  end; }
+end;
 procedure TScreenSaverForm.SetupTerminationTimer;
 begin
   TerminationTimer := TTimer.Create(Self);
@@ -600,7 +666,7 @@ begin
 
   // Clean up Winsock
   WSACleanup;
-
+    MonitorCountTimer.Free;
 end;
 
 procedure TScreenSaverForm.Timer2Timer(Sender: TObject);
@@ -834,11 +900,11 @@ begin
   begin
     SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE);
     SetForegroundWindow(Handle);
-  end
-  else if Msg.Msg = WM_DISPLAYCHANGE then
-  begin
-    Application.Terminate;
   end;
+  //else if Msg.Msg = WM_DISPLAYCHANGE then
+  //begin
+   // Application.Terminate;
+  //end;
 end;
 function FormatUptime(Uptime: Int64): string;
 var
